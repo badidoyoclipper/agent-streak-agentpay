@@ -256,10 +256,10 @@ that mirror the reference contracts' semantics (v2.0.0).
 
 | Contract | Address (BNB Chain mainnet) |
 | --- | --- |
-| AgentStreak | TBD after deployment |
-| AgentPay | TBD after deployment |
-| ScoreGateDemo | TBD after deployment |
-| AgentId8004Bridge | TBD after deployment |
+| AgentStreak | `0xde372AA9C315814361771c2Ff21157d5fABBD9eB` |
+| AgentPay | `0x672Bff3C451551A36bD645543ea9c78e9BD42f85` |
+| ScoreGateDemo | `0x0e6eD55c61d1A8ae40950E98CD52a9C7509DDc03` |
+| AgentId8004Bridge | `0x24857DAe4A574C6BBFa935fda1d7E1fC1865AE5c` |
 | Agent ID registry (SPACE ID, official) | `0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F` |
 | ERC-8004 Identity Registry (official) | `0x8004A169FB4a3325136EB29fA0ceB6D2e539a432` |
 | ERC-8004 Reputation Registry (official) | `0x8004BAa17C55a88189AE136b182e5fdA19dE9b63` |
@@ -268,8 +268,11 @@ that mirror the reference contracts' semantics (v2.0.0).
 Constructor arguments: `AgentStreak(registry, true)`, `AgentPay(registry, true)`,
 `ScoreGateDemo(agentStreakAddress, 3)`,
 `AgentId8004Bridge(erc8004Identity, erc8004Reputation, agentStreakAddress, agentPayAddress)`.
-Sources are verified on BscScan at
-deployment time; this repository is the exact source of the deployed code.
+Deployed 2026-11-20 from deployer `0xe489636a981FA6024Ea22B923b40Af61B5f37565`.
+All four sources are verified on Sourcify with an exact match (creation and
+runtime), which BscScan also displays; this repository is the exact source
+of the deployed code. The project itself is registered as an ERC-8004 agent
+— see `agent-registration.json`.
 
 ## License
 
