@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Profile — Agent Streak + AgentPay</title>
+<style>
+  :root { color-scheme: dark; }
+  body { font-family: system-ui, sans-serif; margin: 0; background: #0b0e13; color: #e8ecf1; }
+  main { max-width: 720px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 24px; margin: 8px 0 4px; word-break: break-all; }
+  h2 { font-size: 17px; margin: 0 0 12px; }
+  .card { background: #131922; border: 1px solid #26303f; border-radius: 12px; padding: 18px; margin-bottom: 18px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+  .stat { background: #0e141d; border: 1px solid #223048; border-radius: 10px; padding: 12px; text-align: center; }
+  .stat b { display: block; font-size: 22px; }
+  .stat span { color: #9fb0c3; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+  .ok { color: #3ecf6f; } .bad { color: #ff6b6b; } .muted { color: #9fb0c3; }
+  .note { font-size: 13px; color: #9fb0c3; line-height: 1.55; }
+  a { color: #f0b90b; }
+  button { background: #223048; color: #e8ecf1; border: 0; border-radius: 8px; padding: 9px 14px; font-weight: 600; cursor: pointer; }
+  .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+  .badge.yes { background: #14351f; color: #3ecf6f; border: 1px solid #3ecf6f; }
+  .badge.no { background: #2a1414; color: #ff6b6b; border: 1px solid #7a2d2d; }
+  .badge.trusted { background: #33300f; color: #f0b90b; border: 1px solid #f0b90b; }
+</style>
+</head>
+<body>
+<main>
+  <p class="muted" style="margin:0"><a href="index.html">← Agent Streak + AgentPay</a></p>
+  <h1 id="addrTitle">Agent profile</h1>
+  <p id="holderLine" class="note">Loading on-chain data…</p>
+
+  <div class="card">
+    <h2>🔥 Streak & reputation</h2>
+    <div class="grid">
+      <div class="stat"><b id="pCur">–</b><span>Current streak</span></div>
+      <div class="stat"><b id="pBest">–</b><span>Longest streak</span></div>
+      <div class="stat"><b id="pTotal">–</b><span>Total check-ins</span></div>
+      <div class="stat"><b id="pScore">–</b><span>Score</span></div>
+      <div class="stat"><b id="pActive">–</b><span>Streak alive</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>💸 Payments (AgentPay)</h2>
+    <div class="grid">
+      <div class="stat"><b id="pReqCreated">–</b><span>Requests created</span></div>
+      <div class="stat"><b id="pReceived">–</b><span>Payments received</span></div>
+      <div class="stat"><b id="pSent">–</b><span>Payments sent</span></div>
+      <div class="stat"><b id="pVolReceived">–</b><span>Volume received</span></div>
+      <div class="stat"><b id="pVolSent">–</b><span>Volume sent</span></div>
+    </div>
+    <p class="note" id="volNote"></p>
+  </div>
+
+  <div class="card">
+    <h2>🛡️ Trusted Agent badge</h2>
+    <p id="badgeLine"><span class="badge no">Loading…</span></p>
+    <p class="note">The badge is issued by ScoreGateDemo, an independent demo contract that reads this
+    profile's AgentStreak score on-chain and unlocks its badge only above a score threshold — a live proof
+    that the reputation recorded here can be consumed by other projects.</p>
+  </div>
+
+  <div class="card">
+    <h2>Share this profile</h2>
+    <p class="note" id="shareUrl" style="word-break:break-all"></p>
+    <button id="copyBtn">Copy profile link</button>
+    <p class="note" style="margin-top:14px">This page is read-only: it loads public on-chain data for the
+    address in the URL. It cannot move funds and never asks for credentials. Reputation shown here is an
+    identity record — it is not a promise of any return or reward.</p>
+  </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
+<script src="config.js"></script>
+<script src="abi.js"></script>
+<script src="profile.js"></script>
+</body>
+</html>

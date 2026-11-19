@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Streak + AgentPay — reputation & payments for Agent ID holders</title>
+<style>
+  :root { color-scheme: dark; }
+  body { font-family: system-ui, sans-serif; margin: 0; background: #0b0e13; color: #e8ecf1; }
+  main { max-width: 880px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 28px; margin: 8px 0 4px; }
+  h2 { font-size: 19px; margin: 0 0 12px; }
+  .sub { color: #9fb0c3; margin: 0 0 20px; line-height: 1.5; }
+  .card { background: #131922; border: 1px solid #26303f; border-radius: 12px; padding: 18px; margin-bottom: 18px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+  .stat { background: #0e141d; border: 1px solid #223048; border-radius: 10px; padding: 12px; text-align: center; }
+  .stat b { display: block; font-size: 24px; }
+  .stat span { color: #9fb0c3; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+  button { background: #f0b90b; color: #111; border: 0; border-radius: 8px; padding: 10px 16px; font-weight: 600; cursor: pointer; }
+  button.secondary { background: #223048; color: #e8ecf1; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  input { width: 100%; box-sizing: border-box; background: #0e141d; border: 1px solid #223048; color: #e8ecf1; border-radius: 8px; padding: 10px; margin: 4px 0 12px; }
+  label { font-size: 13px; color: #9fb0c3; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .ok { color: #3ecf6f; } .bad { color: #ff6b6b; } .muted { color: #9fb0c3; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  td, th { border-bottom: 1px solid #223048; padding: 8px 6px; text-align: left; }
+  .note { font-size: 13px; color: #9fb0c3; line-height: 1.55; }
+  a { color: #f0b90b; }
+  #log { font-size: 13px; white-space: pre-wrap; word-break: break-all; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Agent Streak + AgentPay</h1>
+  <p class="sub">Daily check-in streaks and payment requests for <b>Binance Agent ID</b> holders on BNB Chain.
+  An Agent ID (name.ai) is a unique, non-transferable identity — so streaks and payment history recorded
+  against it form a reputation that other dApps can read on-chain.</p>
+
+  <div class="card">
+    <div class="row">
+      <button id="connectBtn">Connect wallet</button>
+      <span id="account" class="muted">Not connected</span>
+    </div>
+    <p id="holderStatus" class="note" style="margin-top:12px"></p>
+    <p class="note">Every action on this page is a normal transaction that <b>you</b> review and confirm in
+    your own wallet. Nothing here executes anything on your behalf, and this page never asks for a seed
+    phrase, private key, or pairing code.</p>
+  </div>
+
+  <div class="card">
+    <h2>🔥 My streak</h2>
+    <div class="grid">
+      <div class="stat"><b id="stCur">–</b><span>Current streak</span></div>
+      <div class="stat"><b id="stBest">–</b><span>Longest streak</span></div>
+      <div class="stat"><b id="stTotal">–</b><span>Total check-ins</span></div>
+      <div class="stat"><b id="stScore">–</b><span>Score</span></div>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <button id="checkInBtn" disabled>Check in today</button>
+      <span id="checkInHint" class="muted"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>💸 AgentPay — request a payment</h2>
+    <label>Token contract (default: USDT on BNB Chain)</label>
+    <input id="reqToken">
+    <label>Amount</label>
+    <input id="reqAmount" type="number" min="0" step="any" placeholder="25">
+    <label>Memo (max 140 characters)</label>
+    <input id="reqMemo" maxlength="140" placeholder="What is this payment for?">
+    <button id="createReqBtn" disabled>Create payment request</button>
+
+    <h2 style="margin-top:26px">My requests</h2>
+    <div id="myRequests" class="muted">Connect your wallet to load your requests.</div>
+
+    <h2 style="margin-top:26px">Pay a request</h2>
+    <label>Request ID</label>
+    <input id="payId" type="number" min="0" placeholder="0">
+    <div class="row">
+      <button id="loadReqBtn" class="secondary">Load request</button>
+      <button id="approveBtn" disabled>Approve token</button>
+      <button id="payBtn" disabled>Pay request</button>
+    </div>
+    <p id="payDetails" class="note"></p>
+    <p class="note">My payment stats — sent: <b id="paySent">–</b> · received: <b id="payReceived">–</b></p>
+  </div>
+
+  <div class="card">
+    <h2>🪪 Public profile</h2>
+    <p class="note">Every holder gets a shareable profile card: streak, reputation score, settled payments,
+    and Trusted Agent badge status — read live from chain, no wallet needed to view. Link it anywhere as
+    your agent's trusted name card.</p>
+    <label>Agent wallet address</label>
+    <input id="profileAddr" placeholder="0x…">
+    <div class="row">
+      <button id="viewProfileBtn" class="secondary">View profile</button>
+      <a id="myProfileLink" href="#" style="display:none">Open my public profile →</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Contracts</h2>
+    <p class="note" id="contractsInfo"></p>
+    <p class="note">Reputation and payment history are public records used for identity purposes only.
+    This product does not promise or imply any return, income, or reward for checking in or making payments.
+    Cryptocurrency transactions are irreversible — always verify the request details before confirming.</p>
+    <p id="log"></p>
+  </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
+<script src="config.js"></script>
+<script src="abi.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
