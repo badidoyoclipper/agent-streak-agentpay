@@ -19,11 +19,12 @@ window.APP_CONFIG = {
   erc8004Identity: "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
   erc8004Reputation: "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
 
-  // TBD after deployment — the pages stay read-only until these are set.
-  agentStreakAddress: "",
-  agentPayAddress: "",
-  scoreGateAddress: "",
-  agentBridgeAddress: "",
+  // Deployed 2026-11-20 on BNB Chain mainnet; sources verified on
+  // Sourcify (exact match). See README "Deployment" for BscScan links.
+  agentStreakAddress: "0xde372AA9C315814361771c2Ff21157d5fABBD9eB",
+  agentPayAddress: "0x672Bff3C451551A36bD645543ea9c78e9BD42f85",
+  scoreGateAddress: "0x0e6eD55c61d1A8ae40950E98CD52a9C7509DDc03",
+  agentBridgeAddress: "0x24857DAe4A574C6BBFa935fda1d7E1fC1865AE5c",
 
   // BEP-20 USDT on BNB Chain (18 decimals), the default payment token.
   defaultToken: "0x55d398326f99059fF775485246999027B3197955",
