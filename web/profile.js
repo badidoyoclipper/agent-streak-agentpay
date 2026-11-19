@@ -31,6 +31,10 @@
         : '<span class="bad">✘ This address does not hold an Agent ID</span>') +
       ' · <a target="_blank" href="' + CFG.explorer + "/address/" + agent + '">View on BscScan</a>';
 
+    // The ERC-8004 passport depends only on the (already live) global
+    // registries, so it renders even before our own contracts deploy.
+    await load8004(provider);
+
     if (!CFG.agentStreakAddress || !CFG.agentPayAddress) {
       $("holderLine").innerHTML +=
         '<br><span class="muted">AgentStreak / AgentPay are not deployed yet — streak and payment data will appear here after deployment.</span>';
@@ -76,6 +80,106 @@
     } else {
       $("badgeLine").innerHTML = '<span class="badge no">Unavailable — demo contract not deployed yet</span>';
     }
+  }
+
+  // ---------------------------------------------------------------
+  // ERC-8004 passport: registration status, agent id, feedback
+  // summary, and the latest snapshots our bridge published.
+  // ---------------------------------------------------------------
+
+  async function load8004(provider) {
+    const set = (id, txt) => { $(id).textContent = txt; };
+    try {
+      const identity = new ethers.Contract(CFG.erc8004Identity, window.ABIS.erc8004Identity, provider);
+      const reputation = new ethers.Contract(CFG.erc8004Reputation, window.ABIS.erc8004Reputation, provider);
+
+      const count = await identity.balanceOf(agent);
+      set("e8Registered", count > 0n ? "Yes (" + count.toString() + " agent" + (count > 1n ? "s" : "") + ")" : "No");
+      if (count === 0n) {
+        set("e8AgentId", "—");
+        $("e8Note").innerHTML += "<br>This address has not registered an ERC-8004 agent yet.";
+        return;
+      }
+
+      // Discover the agent id: an explicit &id8004=<id> wins; otherwise
+      // scan the indexed Registered events (the registry deliberately
+      // has no on-chain enumeration).
+      let agentId = null;
+      const param = params.get("id8004");
+      if (param !== null && /^\d+$/.test(param)) {
+        agentId = BigInt(param);
+      } else {
+        agentId = await discoverAgentId(provider, identity);
+      }
+      if (agentId === null) {
+        set("e8AgentId", "not found");
+        $("e8Note").innerHTML +=
+          "<br>Could not auto-discover this address's ERC-8004 agent ID through the public RPC — append &amp;id8004=&lt;agentId&gt; to the URL.";
+        return;
+      }
+      set("e8AgentId", agentId.toString());
+
+      const wallet = await identity.getAgentWallet(agentId);
+      $("e8Wallet").innerHTML =
+        'Verified ERC-8004 agent wallet: <a target="_blank" href="' + CFG.explorer + "/address/" + wallet + '">' + wallet + "</a>";
+
+      // Feedback summary across every client that ever rated this agent
+      // (getSummary requires a non-empty client list by design).
+      const clients = await reputation.getClients(agentId);
+      if (clients.length > 0) {
+        const [fbCount, avg, dec] = await reputation.getSummary(agentId, clients, "", "");
+        set("e8FbCount", fbCount.toString());
+        set("e8FbAvg", ethers.formatUnits(avg, dec));
+      } else {
+        set("e8FbCount", "0");
+        set("e8FbAvg", "—");
+      }
+
+      // Latest snapshots published by our bridge, once it is deployed.
+      if (CFG.agentBridgeAddress) {
+        const bridge = new ethers.Contract(CFG.agentBridgeAddress, window.ABIS.bridge, provider);
+        const [sVal, sIdx] = await bridge.getPublishedSnapshot(agentId, 0);
+        const [pVal, pIdx] = await bridge.getPublishedSnapshot(agentId, 1);
+        set("e8SnapStreak", sIdx > 0n ? sVal.toString() : "not published yet");
+        set("e8SnapPay", pIdx > 0n ? pVal.toString() : "not published yet");
+      } else {
+        set("e8SnapStreak", "bridge not deployed yet");
+        set("e8SnapPay", "bridge not deployed yet");
+      }
+    } catch (e) {
+      set("e8Registered", "unavailable");
+      $("e8Note").innerHTML +=
+        "<br>ERC-8004 data could not be loaded from the public RPC (" + (e.shortMessage || e.message) + ").";
+    }
+  }
+
+  // Best-effort agent-id discovery: walk the Registered event log
+  // backwards in chunks. Returns the agentId of the address's most
+  // recent registration, or null when it cannot be found this way.
+  async function discoverAgentId(provider, identity) {
+    try {
+      const topic = identity.interface.getEvent("Registered").topicHash;
+      const ownerTopic = ethers.zeroPadValue(agent, 32);
+      const latest = await provider.getBlockNumber();
+      const CHUNK = 100000;
+      const MAX_CHUNKS = 40; // ~4M blocks of history, best effort
+      for (let i = 0; i < MAX_CHUNKS; i++) {
+        const to = latest - i * CHUNK;
+        if (to < 0) break;
+        const from = Math.max(0, to - CHUNK + 1);
+        const logs = await provider.getLogs({
+          address: CFG.erc8004Identity,
+          topics: [topic, null, ownerTopic],
+          fromBlock: from,
+          toBlock: to
+        });
+        if (logs.length > 0) {
+          return identity.interface.parseLog(logs[logs.length - 1]).args.agentId;
+        }
+        if (from === 0) break;
+      }
+    } catch (e) { /* fall through: caller shows the id8004 hint */ }
+    return null;
   }
 
   main().catch((e) => {
