@@ -63,6 +63,25 @@
   </div>
 
   <div class="card">
+    <h2>🌐 ERC-8004 passport</h2>
+    <div class="grid">
+      <div class="stat"><b id="e8Registered">–</b><span>ERC-8004 registered</span></div>
+      <div class="stat"><b id="e8AgentId">–</b><span>ERC-8004 agent ID</span></div>
+      <div class="stat"><b id="e8FbCount">–</b><span>Feedback entries</span></div>
+      <div class="stat"><b id="e8FbAvg">–</b><span>Average feedback</span></div>
+      <div class="stat"><b id="e8SnapStreak">–</b><span>Bridge streak snapshot</span></div>
+      <div class="stat"><b id="e8SnapPay">–</b><span>Bridge payments snapshot</span></div>
+    </div>
+    <p class="note" id="e8Wallet"></p>
+    <p class="note" id="e8Note">This profile is a three-signal passport: the Binance Agent ID above proves
+    <em>who</em> this agent is, the streak &amp; payment record proves <em>what it has done here</em>, and
+    ERC-8004 — the global standard for trustless agent identity and reputation — makes the same record
+    readable by the whole agent ecosystem. Our bridge contract publishes the local record into the
+    ERC-8004 Reputation Registry as standard feedback, so other projects can consume it without ever
+    talking to us.</p>
+  </div>
+
+  <div class="card">
     <h2>Share this profile</h2>
     <p class="note" id="shareUrl" style="word-break:break-all"></p>
     <button id="copyBtn">Copy profile link</button>
